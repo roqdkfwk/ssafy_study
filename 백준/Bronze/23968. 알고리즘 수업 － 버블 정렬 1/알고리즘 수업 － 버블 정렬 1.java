@@ -1,34 +1,52 @@
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 public class Main {
-	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
-		int N = sc.nextInt();
-		int k = sc.nextInt();
-		int [] arr = new int [N];
-		for(int i=0;i<N;i++) {
-			arr[i]=sc.nextInt();
-		}
-		int temp=0;
-		int cnt=0;
-		int[] ans= {-1,-1};
-		for(int i=N-1;i>=0;i--) {
-			for(int j=0;j<i;j++) {
-				if(arr[j]>arr[j+1]) {
-					temp=arr[j+1];
-					arr[j+1]=arr[j];
-					arr[j]=temp;
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st;
+		
+		st = new StringTokenizer(br.readLine());
+		int N = Integer.parseInt(st.nextToken());
+		int K = Integer.parseInt(st.nextToken());
+		
+		int[] A = new int[N];
+		st = new StringTokenizer(br.readLine());
+		for (int i = 0; i < N; i++) A[i] = Integer.parseInt(st.nextToken());
+		
+		int flag;
+		int cnt = 0;
+		for (int i = 0; i < N; i++) {
+			
+			flag = 0;
+			for (int j = 0; j < N - 1; j++) {
+				
+				// 앞의 숫자가 뒤의 숫자보다 크면 두 숫자의 자리를 바꿈
+				if (A[j] > A[j + 1]) {
+					int tmp = A[j];
+					A[j] = A[j + 1];
+					A[j + 1] = tmp;
+					flag = 1;
 					cnt++;
-					if(cnt==k) {
-						ans[0]=arr[j];
-						ans[1]=arr[j+1];
-					}
 				}
+				
+				if (cnt == K) {
+					int num1 = A[j];
+					int num2 = A[j + 1];
+					System.out.println(num1 + " " + num2);
+					break;
+				}
+				
+			}	// j에 대한 for문
+			
+			if (cnt == K) break;
+			else if (flag == 0 && cnt < K) {				
+				System.out.println(-1);
+				break;
 			}
-		}
-		if(ans[0]!= -1)
-			System.out.print(ans[0]+" "+ans[1]);
-		else
-			System.out.print(ans[0]);
+		}	// i에 대한 for문
+		
 	}
 }
