@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -45,19 +46,7 @@ public class Main {
 			return Math.min(pay[0][(col + 1) % 3], pay[0][(col + 2) % 3]);
 		}
 		
-		// 이전 집의 색과 다른 색 중에서 최소 비용을 선택
-	    int minCost = Integer.MAX_VALUE;
-	    for (int i = 0; i < 3; i++) {
-	        if (i != col) {
-	            // 이미 계산된 값을 활용하여 재귀 호출
-	            minCost = Math.min(minCost, searchMinimumPay(row - 1, i));
-	        }
-	    }
-	    
-	 // 현재 집을 선택한 색의 비용과 이전 집의 색과 다른 색 중에서의 최소 비용을 더함
-	    return dp[row][col] = pay[row][col] + minCost;
-		
-//		// n번재 row의 c번째 col까지의 최솟값은 pay[n][c] 에 pay[n - 1][(c + 1) % 3]과 pay[n - 1][(c + 2) % 3]값 중 더 작은 값의 합이다.
-//		return pay[row][col] + Math.min(searchMinimumPay(row - 1, (col + 1) % 3), searchMinimumPay(row - 1, (col + 2) % 3));
+		// n번재 row의 c번째 col까지의 최솟값은 pay[n][c] 에 pay[n - 1][(c + 1) % 3]과 pay[n - 1][(c + 2) % 3]값 중 더 작은 값의 합이다.
+		return dp[row][col] = pay[row][col] + Math.min(searchMinimumPay(row - 1, (col + 1) % 3), searchMinimumPay(row - 1, (col + 2) % 3));
 	}
 }
