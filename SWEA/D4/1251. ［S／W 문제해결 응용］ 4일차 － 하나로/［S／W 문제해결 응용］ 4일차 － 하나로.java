@@ -1,17 +1,16 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.StringTokenizer;
 
 public class Solution {
 
 	static int T;	// 테스트 케이스의 개수
 	static int N;	// 섬의 개수
+	static final double INF = Double.MAX_VALUE;
 	static long[][] map;	// 섬의 좌표
 	static double E;	// 세율 실수
-	static double[][] edges;	// [0] : 시작정점, [1] : 끝정점, [2] : 가중치
+	static double[][] adjArr;	// [0] : 시작정점, [1] : 끝정점, [2] : 가중치
 	static double ans;	// 최소 환경부담금
 	static int pick;	
 	static int[] p;	// 대표자를 저장할 배열
@@ -39,58 +38,51 @@ public class Solution {
 			
 			E = Double.parseDouble(br.readLine());	// 세율실수
 			
-			edges = new double[(N * (N - 1)) / 2][3];
-			int idx =0;
+			adjArr = new double[N][N];
 			for (int i = 0; i < N; i++) {	// 섬이 N개이므로 간선의 개수는 (N - 1)개
-				for (int j = i + 1; j < N; j++) {
-					edges[idx][0] = i;
-					edges[idx][1] = j;
-					edges[idx][2] = calCost(i, j, E);
-					idx++;
+				for (int j = 0; j < N; j++) {
+					
+					adjArr[i][j] = adjArr[j][i] = calCost(i, j, E);
 				}
 			}	// 간선들의 가중치 모두 계산
+						
+			boolean[] visit = new boolean[N];
+			int[] p = new int[N];
+			double[] dist = new double[N];
 			
-//			System.out.println((N * (N - 1)) / 2);
-			
-//			for (double[] edge : edges) {
-//				System.out.println(Arrays.toString(edge));
-//			}
-//			System.out.println();
-			
-			Arrays.sort(edges, new Comparator<double[]>() {
-				 
-                @Override
-                public int compare(double[] o1, double[] o2) {
-//                    if (o1[2] >= o2[2]) return 1;
-//                    else return -1;
-                	return (o1[2] - o2[2]) < 0? -1:1; 
-                }
-            });	// 간선들을 가중치 기준으로 오름차순으로 정렬
-			
-//			for (double[] edge : edges) {
-//				System.out.println(Arrays.toString(edge));
-//			}
-//			System.out.println();
-			
+			for (int i = 0; i < N; i++) {
+				dist[i] = INF;
+				p[i] = -1;
+			}
+
+			dist[0] = 0;			
 			ans = 0;	// 비용의 합은 테스트 케이스마다 0으로 초기화
-			pick = 0;	// 선택한 간선의 개수도 테스트 케이스마다 0으로 초기화
 			
-			// 대표자를 자기 자신으로 초기화
-			p =  new int[N + 1];
-			for (int i = 1; i < N + 1; i++) p[i] = i;
-			for (int i = 0; i < (N * (N - 1)) / 2; i++) {
+			for (int i = 0; i < N - 1; i++) {
 				
-				int px = findset((int)edges[i][0]);
-				int py = findset((int)edges[i][1]);
+				double min = INF;
+				int index = -1;
 				
-				if (px != py) {
-					union(px, py);
-					ans += edges[i][2];
-					pick++;
+				for (int j = 0; j < N; j++) {
+					
+					if (!visit[j] && dist[j] < min) {
+						min = dist[j];
+						index = j;
+					}
 				}
 				
-				if (pick == (N - 1)) break;
-			}	// 가충지의 합을 계산하는 for문
+				visit[index] = true;
+				
+				for (int j = 0; j < N; j++) {
+					
+					if (!visit[j] && adjArr[index][j] != 0 && dist[j] > adjArr[index][j]) {
+						dist[j] = adjArr[index][j];
+						p[j] = index;
+					}
+				}
+			}
+			
+			for (int i = 0; i < N; i++) ans+= dist[i];
 			
 			ans *= E;
 			ans = Math.round(ans);
@@ -99,20 +91,10 @@ public class Solution {
 		
 		System.out.println(sb);
 	}	// main
-
-	static void union(int px, int py) {
-		
-		p[findset(py)] = findset(px);
-	}	// union
-
-	static int findset(int x) {
-		
-		if (x != p[x])	// x가 대표자가 아니라면
-			p[x] = findset(p[x]);
-		return p[x];
-	}	// findset
 	
 	static double calCost(int idx1, int idx2, double e) {
+		
+		if (idx1 == idx2) return 0;
 		
 		double x = map[0][idx1] - map[0][idx2];
 		double y = map[1][idx1] - map[1][idx2];
