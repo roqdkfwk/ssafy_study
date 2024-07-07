@@ -36,7 +36,7 @@ public class Main {
 		if (DP[idx] == 0) 
 			DP[idx] = 1;
 		
-		for (int i = N - 1; i >= 0; i--) {
+		for (int i = idx - 1; i >= 0; i--) {
 			
 			if (A[i] < A[idx])
 				DP[idx] = Math.max(DP[idx], DP[i] + 1);
