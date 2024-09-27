@@ -11,7 +11,7 @@ public class Main {
 
 	static int N, M;
 	static int[] degree;
-	static List<List<Integer>> adj;
+	static List<Integer>[] adj;
 	
 	public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -22,11 +22,10 @@ public class Main {
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
 
-        adj = new ArrayList<>();
+        adj = new List[N + 1];
         degree = new int[N + 1];
-
         for (int i = 0; i <= N; i++) {
-        	adj.add(new ArrayList<>());
+        	adj[i] = new ArrayList<>();
         }
 
         for (int i = 0; i < M; i++) {
@@ -34,7 +33,7 @@ public class Main {
             int A = Integer.parseInt(st.nextToken());
             int B = Integer.parseInt(st.nextToken());
             
-            adj.get(A).add(B);
+            adj[A].add(B);
             degree[B]++;
         }
 
@@ -46,10 +45,10 @@ public class Main {
         }
 
         while (!queue.isEmpty()) {
-            int current = queue.poll();
-            sb.append(current).append(" ");
+            int curr = queue.poll();
+            sb.append(curr).append(" ");
 
-            for (int next : adj.get(current)) {
+            for (int next : adj[curr]) {
             	degree[next]--;
                 if (degree[next] == 0) {
                     queue.add(next);
