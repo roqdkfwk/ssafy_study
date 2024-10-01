@@ -12,8 +12,12 @@ public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		N = Integer.parseInt(br.readLine());
+		if (N == 1) {
+			System.out.println(0);
+			return;
+		}
 		
-		// 소수 찾기
+		// 소수 찾고
 		boolean[] prime = new boolean[N + 1]; 
 		Arrays.fill(prime, true);
 		prime[0] = prime[1] = false;
@@ -36,7 +40,7 @@ public class Main {
 			}
 		}
 		
-		// 소수들의 합 prefix 만들기
+		// 소수들의 합 prefix 만들고
 		Integer[] primeArr = primeSet.toArray(new Integer[0]);
 		Arrays.sort(primeArr);
 		
@@ -48,14 +52,16 @@ public class Main {
 		
 		// 투 포인터로 해당 값을 찾을 수 있는지 탐색
 		int answer = 0;
-		int left = 0, right = 0;
-
-		while (right <= cntPrime) {
+		int left = 0, right = 1;
+		while (left <= cntPrime) {
 			int sum = prefix[right] - prefix[left];
 			
 			if (sum > N) {
 				left++;
 			} else if (sum < N) {
+				if (right == cntPrime) {
+					break;
+				}
 				right++;
 			} else {
 				answer++;
