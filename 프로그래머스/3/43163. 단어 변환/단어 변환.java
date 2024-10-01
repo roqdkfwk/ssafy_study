@@ -1,34 +1,33 @@
 import java.util.*;
+import java.io.*;
+
 class Solution {
     public int solution(String begin, String target, String[] words) {
         int answer = 0;
         
-        Queue<String> queue = new LinkedList<>(); // 변환 가능한 단어들을 저장할 queue
-        Set<String> set = new HashSet<>(Arrays.asList(words)); // 단어들의 집합 set
+        Set<String> set = new HashSet<>(Arrays.asList(words));
+        Queue<String> queue = new LinkedList<>();
         
-        if(!set.contains(target)){
-            return 0; // 변환할 수 없는 경우
+        if (!set.contains(target)) {    // set 안에 target 단어가 없다면
+            return 0;                   // 0을 반환하고 종료
         }
-        
-        queue.offer(begin); // queue에 begin 단어 추가
-        set.remove(begin); // set에서 begin 단어 제거
-        
-        while (!queue.isEmpty()){
-            
-            for (int i=0; i<queue.size(); i++){
-                // queue에서 단어를 하나씩 꺼내어 current (현재단어)에 저장
-                String current = queue.poll();
-                
-                if (current.equals(target)){
-                    return answer; // 타겟 단어에 도달
+        queue.add(begin);               // queue에 시작 단어를 넣음
+        set.remove(begin);              // set에서 시작 단어를 제거
+        while (!queue.isEmpty()) {      // bfs 시작
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                String curr = queue.poll();
+
+                if (curr.equals(target)) {  // target에 도달한 경우 bfs 종료
+                    return answer;
                 }
                 
-                // HashSet 타입은 for 루프를 사용할 수 없으므로 to.Array()를 사용해 배열로 변환
-                for (String word : set.toArray(new String[set.size()])){
-                    // 변환 가능하면 queue에 해당 단어를 추가하고 set에서 제거
-                    if(canConvert(current,word)){
-                        queue.offer(word);
-                        set.remove(word);
+                Iterator<String> iter = set.iterator();
+                while (iter.hasNext()) {            // set를 순회하면서 word를 꺼내옴
+                    String word = iter.next();
+                    if (canConvert(curr, word)) {   // curr에서 word로 변환할 수 있다면
+                        queue.add(word);            // queue에 word를 넣고
+                        iter.remove();          // set에서 word를 제거
                     }
                 }
             }
@@ -36,16 +35,17 @@ class Solution {
             answer++;
         }
         
-        return 0; // 변환할 수 없는 경우
+        return answer;
     }
     
-    private boolean canConvert(String word1, String word2){
-        int diffCnt = 0;
-        for (int i = 0; i<word1.length(); i++){
-            if (word1.charAt(i) != word2.charAt(i)){
-                diffCnt++;
+    boolean canConvert(String str1, String str2) {
+        int cnt = 0;    // 서로 다른 알파벳의 개수
+        for (int i = 0; i < str1.length(); i++) {
+            if (str1.charAt(i) != str2.charAt(i)) {
+                cnt++;
             }
         }
-        return diffCnt ==1;
+        
+        return cnt == 1;    // 서로 다른 알파벳의 개수가 1개인지 아닌지 반환
     }
 }
