@@ -7,6 +7,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
 
         N = Integer.parseInt(br.readLine());
         pre = new PriorityQueue<>(Comparator.reverseOrder());
@@ -25,7 +26,9 @@ public class Main {
                 post.add(tmp);
             }
 
-            System.out.println(pre.peek());
+            sb.append(pre.peek()).append("\n");
         }
+
+        System.out.println(sb.toString().trim());
     }
 }
