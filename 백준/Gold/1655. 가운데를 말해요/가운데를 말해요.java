@@ -29,6 +29,6 @@ public class Main {
             sb.append(pre.peek()).append("\n");
         }
 
-        System.out.println(sb.toString().trim());
+        System.out.println(sb);
     }
 }
