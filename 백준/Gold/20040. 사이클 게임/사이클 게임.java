@@ -53,10 +53,15 @@ public class Main {
 	}
 	
 	static public void union(int v1, int v2) {
-		int x = find(v1);
-		int y = find(v2);
-
-		if (x != y)
-			parent[y] = x;
+//		int x = find(v1);
+//		int y = find(v2);
+//
+//		if (x != y)
+//			parent[y] = x;
+		
+		if (v1 > v2)
+			parent[v1] = v2;
+		else
+			parent[v2] = v1;
     }
 }
