@@ -1,6 +1,2 @@
--- 코드를 입력하세요
-# SELECT count(*) AS count
-# FROM ANIMAL_INS
-
-SELECT COUNT(*) AS count
+SELECT COUNT(ANIMAL_ID) AS count
 FROM ANIMAL_INS
