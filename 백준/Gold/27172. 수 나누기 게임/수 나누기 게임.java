@@ -1,73 +1,48 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
 public class Main {
-
-    static int N;
-    static int maxNum;
-    static int[] players;
-    static HashMap<Integer, Integer> cards;
-    static HashMap<Integer, List<Integer>> winnerMap, loserMap;
-    static StringBuilder sb;
-
     public static void main(String[] args) throws IOException {
-        InputHandler();
-
-        Solution();
-
-        printReesult();
-    }
-
-    private static void printReesult() {
-        System.out.println(sb.toString().trim());
-    }
-
-    private static void Solution() {
-        /*
-        * 완전탐색은 시간초과
-        * 핵심로직
-        * - 1번이 2번한테 이기고, 2번이 3번한테 이기면 1번은 3번한테 이긴다.
-        */
-        winnerMap = new HashMap<>();
-        loserMap = new HashMap<>();
-        for (int card : cards.keySet()) {
-            int num = card;
-            while (num <= maxNum) {
-                num += card;
-
-                if (!cards.containsKey(num)) continue;
-
-                List<Integer> win = winnerMap.getOrDefault(card, new ArrayList<>());
-                win.add(num);
-                winnerMap.put(card, win);
-
-                List<Integer> lose = loserMap.getOrDefault(num, new ArrayList<>());
-                lose.add(card);
-                loserMap.put(num, lose);
+        // 입력 처리를 위한 설정
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int N = Integer.parseInt(br.readLine());
+        
+        // 플레이어들의 카드 번호를 저장할 배열
+        int[] cards = new int[N];
+        // 점수를 저장할 배열 (최종 결과값)
+        int[] scores = new int[N];
+        
+        // 각 숫자의 인덱스를 저장할 배열 (1부터 1,000,000까지)
+        int[] numToIdx = new int[1000001];
+        Arrays.fill(numToIdx, -1);
+        
+        // 카드 입력 받기
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            cards[i] = Integer.parseInt(st.nextToken());
+            numToIdx[cards[i]] = i;  // 각 숫자의 위치 저장
+        }
+        
+        // 각 카드에 대해 배수 관계 확인
+        for (int i = 0; i < N; i++) {
+            int currentNum = cards[i];
+            
+            // currentNum의 배수들을 확인
+            for (int multiple = currentNum * 2; multiple <= 1000000; multiple += currentNum) {
+                // 해당 배수가 다른 플레이어의 카드라면
+                if (numToIdx[multiple] != -1) {
+                    // 현재 플레이어는 승리(+1), 배수를 가진 플레이어는 패배(-1)
+                    scores[i]++;
+                    scores[numToIdx[multiple]]--;
+                }
             }
         }
-
-        sb = new StringBuilder();
-        for (int player : players) {
-            int score = winnerMap.getOrDefault(player, new ArrayList<>()).size()
-                        - loserMap.getOrDefault(player, new ArrayList<>()).size();
+        
+        // 결과 출력
+        StringBuilder sb = new StringBuilder();
+        for (int score : scores) {
             sb.append(score).append(" ");
         }
-    }
-
-    private static void InputHandler() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-
-        N = Integer.parseInt(br.readLine());
-        players = new int[N];
-
-        cards = new HashMap<>();
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N; i++) {
-            int key = Integer.parseInt(st.nextToken());
-            players[i] = key;
-            cards.put(key, 1);
-            maxNum = Math.max(maxNum, key);
-        }
+        System.out.println(sb);
     }
 }
