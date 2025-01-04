@@ -4,21 +4,20 @@ class Solution {
     int r, c;
     int[] dr = {-1, 1, 0, 0};
     int[] dc = {0, 0, -1, 1};
-    HashMap<String, Integer> map1, map2;
+    HashMap<String, Integer> hashMap;
     int answer;
     
     public int solution(String dirs) {
-        this.map1 = new HashMap<>();
-        this.map2 = new HashMap<>();
+        this.hashMap = new HashMap<>();
         
         for (int n = 0; n < dirs.length(); n++) {
             move(dirs.charAt(n));
         }
-        return map1.size();
+        return hashMap.size();
     }
     
     void move(char direction) {
-        // U : 1, D : 1, L : 2, R : 3
+        // U : 1, D : 0, L : 2, R : 3
         int d = 0;
         if (direction == 'U') d = 1;
         else if (direction == 'D') d = 0;
@@ -34,10 +33,7 @@ class Solution {
         double cc = (double)(c + nc) / 2;
         
         r = nr;
-        c = nc;
-        
-        String key = cr + "." + cc;
-        if (map1.containsKey(key)) map2.put(key, 1);
-        else map1.put(key, 1);
+        c = nc;        
+        hashMap.put(cr + "." + cc, 1);
     }
 }
