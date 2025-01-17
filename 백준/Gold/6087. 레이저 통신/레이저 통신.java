@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 public class Main {
-    
+
     static class Node implements Comparable<Node> {
         int r, c, dir, mirrors;
 
@@ -28,8 +28,8 @@ public class Main {
     public static void main(String[] args) throws IOException {
         InputHandler();
 
-
         Solution();
+
         printResult();
     }
 
@@ -43,7 +43,7 @@ public class Main {
 
     private static void dijkstra() {
         PriorityQueue<Node> pq = new PriorityQueue<>();
-        pq.add(new Node(center[0][0], center[0][1], -1, 0)); // 초기 위치
+        pq.add(new Node(center[0][0], center[0][1], -1, 0));
         distance[center[0][0]][center[0][1]] = 0;
 
         while (!pq.isEmpty()) {
@@ -51,6 +51,8 @@ public class Main {
 
             if (distance[current.r][current.c] < current.mirrors) continue;
 
+            // 사용한 거울의 개수가 적다면 이동 거리는 짧거나 같으므로
+            // (r, c) 위치에 도착할 때까지 사용한 거울의 개수의 최솟값만 구하면 해당 경로가 최단거리이다.
             for (int i = 0; i < 4; i++) {
                 int nr = current.r + dr[i];
                 int nc = current.c + dc[i];
@@ -91,7 +93,7 @@ public class Main {
             String str = br.readLine();
             for (int c = 0; c < C; c++) {
                 map[r][c] = str.charAt(c);
-                distance[r][c] = 10001;
+                distance[r][c] = Integer.MAX_VALUE;
 
                 if (map[r][c] == 'C') {
                     center[index][0] = r;
@@ -101,5 +103,4 @@ public class Main {
             }
         }
     }
-
 }
