@@ -7,8 +7,7 @@ public class Main {
 
 	static StringBuilder sb;
 	
-	static class Node {
-		
+	static class Node {	
 		Character data;
 		Node left;
 		Node right;
@@ -75,7 +74,6 @@ public class Main {
 				nodes[rightChild - 'A' + 1].data = rightChild;
 			}
 		}
-
 		preorder(nodes[1]);
 		System.out.println();
 		inorder(nodes[1]);
