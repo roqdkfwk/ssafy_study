@@ -78,9 +78,13 @@ public class Main {
             edges++;
             answer -= connection.length;
         }
+        
+        for (int i = 0; i < N; i++) {
+            parent[i] = findParent(i);
+        }
 
         for (int i = 1; i < N; i++) {
-            if (findParent(i) != findParent(i - 1)) {
+            if (parent[i] != parent[i - 1]) {
                 answer = -1;
                 return;
             }
