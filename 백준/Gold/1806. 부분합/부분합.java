@@ -1,43 +1,41 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.StringTokenizer;
-
+import java.util.*;
+import java.io.*;
 public class Main {
-
-    static int N, S;
-    static long[] prefix;
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-
-        st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        S = Integer.parseInt(st.nextToken());
-
-        st = new StringTokenizer(br.readLine());
-        prefix = new long[N + 1];
-        prefix[0] = 0;
-        for (int i = 1; i <= N; i++) {
-            prefix[i] = prefix[i - 1] + Integer.parseInt(st.nextToken());
-        }
-
-        int start = 0;
-        int end = 1;
-        int length = Integer.MAX_VALUE;
-        while (start < N) {
-            long sum = prefix[end] - prefix[start];
-            if (sum >= S) {
-                length = Math.min(length, end - start);
-                start++;
-            } else {
-            	if (end == N) break;
-                end++;
-            }
-        }
-
-        int answer = length == Integer.MAX_VALUE ? 0 : length;
-        System.out.println(answer);
-    }   // main
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st;
+		
+		st = new StringTokenizer(br.readLine());
+		int N = Integer.parseInt(st.nextToken());
+		int S = Integer.parseInt(st.nextToken());
+		
+		long[] prefix = new long[N + 1];
+		st = new StringTokenizer(br.readLine());
+		for (int i = 1; i <= N; i++) {
+			int num = Integer.parseInt(st.nextToken());
+			if (num >= S) {
+				System.out.println(1);
+				return;
+			}
+			
+			prefix[i] = prefix[i - 1] + num;
+		}
+		
+		int left = 0;
+		int right = 1;
+		int answer = Integer.MAX_VALUE;
+		while(right <= N) {
+			long sum = prefix[right] - prefix[left];
+			
+			if (sum >= S) {
+				answer = Math.min(answer, right - left);
+				left++;
+			} else {
+				right++;
+			}
+		}
+		
+		if (answer == Integer.MAX_VALUE) System.out.println(0);
+		else System.out.println(answer);
+	}
 }
