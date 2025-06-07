@@ -1,83 +1,62 @@
 import java.util.*;
 import java.io.*;
-
 public class Main {
-
-    static int T;
-    static Map<String, String> findParent;
-    static Map<String, HashSet<String>> network;
-    static StringBuilder sb = new StringBuilder();
-
-    public static void main(String[] args) throws IOException {
-        init();
-
-        printResult();
-    }
-
-    private static void init() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-
-        T = Integer.parseInt(br.readLine());
-        for (int t = 0; t < T; t++) {
-
-            int F = Integer.parseInt(br.readLine());
-            String[][] friendShip = new String[F][2];
-            for (int i = 0; i < F; i++) {
-                st = new StringTokenizer(br.readLine());
-                friendShip[i][0] = st.nextToken();
-                friendShip[i][1] = st.nextToken();
-            }
-
-            solution(F, friendShip);
-        }
-    }
-
-    private static void solution(int F, String[][] friendShip) {
-        findParent = new HashMap<>();
-        network = new HashMap<>();
-
-        for (int i = 0; i < F; i++) {
-            if (network.get(friendShip[i][0]) == null) {
-                network.put(friendShip[i][0], new HashSet<>());
-                network.get(friendShip[i][0]).add(friendShip[i][0]);
-            }
-            if (network.get(friendShip[i][1]) == null) {
-                network.put(friendShip[i][1], new HashSet<>());
-                network.get(friendShip[i][1]).add(friendShip[i][1]);
-            }
-
-            String parent1 = findParent.getOrDefault(friendShip[i][0], friendShip[i][0]);
-            String parent2 = findParent.getOrDefault(friendShip[i][1], friendShip[i][1]);
-
-            String parent = parent1;
-            if (!parent1.equals(parent2)) {
-                parent = union(parent1, parent2);
-            }
-
-            sb.append(network.get(parent).size()).append("\n");
-        }
-    }
-
-    private static String union(String p1, String p2) {
-        String[] people = new String[2];
-        people[0] = p1;
-        people[1] = p2;
-        Arrays.sort(people);
-
-        // p2의 부모를 p1으로 바꿔주고 p2의 네트워크에 포함되어 있던 사람들을 p1의 네트워크에 포함시킴
-        findParent.put(people[1], people[0]);
-        network.get(people[0]).addAll(network.get(people[1]));
-
-        // p2를 부모로 갖는 사람들의 부모를 p1으로 바꿈
-        for (String person : network.get(people[1])) {
-            findParent.put(person, people[0]);
-        }
-        network.remove(people[1]);
-        return people[0];
-    }
-
-    private static void printResult() {
-        System.out.println(sb.toString().trim());
-    }
+	
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringBuilder answer = new StringBuilder();
+		
+		int T = Integer.parseInt(br.readLine());
+		for (int t = 0; t < T; t++) {
+			Map<String, String> parent = new HashMap<>();		// Map<친구, 부모>
+			Map<String, Set<String>> network = new HashMap<>();	// Map<친구, 친구들>
+			
+			int F = Integer.parseInt(br.readLine());
+			for (int f = 0; f < F; f++) {
+				String[] str = br.readLine().split(" ");
+				String p1 = str[0];
+				String p2 = str[1];
+				
+				// 속한 네트워크가 없는 경우
+				if (parent.get(p1) == null) {
+					parent.put(p1, p1);
+					network.put(p1, new HashSet<>());
+				}
+				
+				if (parent.get(p2) == null) {
+					parent.put(p2, p2);
+					network.put(p2, new HashSet<>());
+				}
+				
+				// 사전 순으로 앞선 문자열이 부모를 하게 만들기 위해서 정렬
+				str[0] = parent.get(p1);
+				str[1] = parent.get(p2);
+				Arrays.sort(str);
+				
+				// 서로 다른 네트워크인 경우 네트워크를 합친다.
+				if (!(str[0].equals(str[1]))) {
+					union(str[0], str[1], parent, network);
+				}
+				
+				answer.append(network.get(str[0]).size() + 1).append("\n");
+			}
+		}
+		
+		System.out.println(answer.toString().trim());
+	}
+	
+	private static void union(String p1, String p2, Map<String, String> parent, Map<String, Set<String>> network) {
+		// 네트워크를 합치는 과정
+		parent.put(p2, p1);
+		network.get(p1).add(p2);
+		
+		Set<String> set = network.get(p2);
+		for (String p : set) {
+			parent.put(p, p1);
+			network.get(p1).add(p);
+		}
+		
+		// 메모리 절약을 위해서 흡수된 네트워크는 제거
+		network.remove(p2);
+	}
 }
