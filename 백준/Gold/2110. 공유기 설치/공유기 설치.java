@@ -1,76 +1,44 @@
 import java.util.*;
 import java.io.*;
 public class Main {
-
-    static int N, C;
-    static List<Integer> houses;
-    static int firstHouse, lastHouse;
-    static int answer;
-
-    public static void main(String[] args) throws IOException {
-        init();
-
-        solution();
-
-        printResult();
-    }
-
-    private static void printResult() {
-        System.out.println(answer);
-    }
-
-    /**
-     * 인접한 두 공유기 사이의 최대 거리 >> upperbound
-     */
-    private static void solution() {
-        int left = 1;
-        int right = lastHouse + 1;
-
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-
-            // (가지고 있는 공유기의 수) > (설치할 수 있는 공유기의 수)인 경우
-            // 공유기를 설치하는 간격을 좁혀야 하므로 upperbound를 당겨온다.
-            if (C > countRouter(mid)) {
-                right = mid;
-            }
-            // 반대의 경우 공유기를 설치하는 간격을 최대한 넓혀야 하므로 lowerbound를 당겨온다.
-            else {
-                left = mid + 1;
-            }
-        }
-        answer = left - 1;
-    }
-
-    private static int countRouter(int distance) {
-        int lastRouter = houses.get(0);
-        int installedRouter = 1;
-        for (int location : houses) {
-            if (location - lastRouter < distance) continue;
-
-            lastRouter = location;
-            installedRouter++;
-        }
-        return installedRouter;
-    }
-
-    private static void init() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-
-        N = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
-
-        houses = new ArrayList<>();
-        firstHouse = 1_000_000_001;
-        lastHouse = 0;
-        for (int i = 0; i < N; i++) {
-            int num = Integer.parseInt(br.readLine());
-            houses.add(num);
-
-            firstHouse = Math.min(firstHouse, num);
-            lastHouse = Math.max(lastHouse, num);
-        }
-        Collections.sort(houses);
-    }
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		
+		int N = Integer.parseInt(st.nextToken());
+		int C = Integer.parseInt(st.nextToken());
+		
+		int[] 공유기위치 = new int[N];
+		for (int i = 0; i < N; i++) {
+			공유기위치[i] = Integer.parseInt(br.readLine());
+		}
+		Arrays.sort(공유기위치);
+		
+		int left = 1;
+		int right = 공유기위치[N - 1] + 1;
+		while (left < right) {
+			int mid = left + ((right - left) / 2);
+			
+			if (canInstall(공유기위치, C, mid)) {
+				left = mid + 1;
+			} else {
+				right = mid;
+			}
+		}
+		
+		System.out.println(left - 1);
+	}
+	
+	private static boolean canInstall(int[] location, int 목표개수, int 간격) {
+		int 이전공유기위치 = location[0];
+		int 개수 = 1;
+		for (int i = 1; i < location.length; i++) {
+			if (location[i] - 이전공유기위치 < 간격) continue;
+				
+			이전공유기위치 = location[i];
+			개수++;
+		}
+		
+		return 개수 >= 목표개수;
+	}
 }
