@@ -1,61 +1,56 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.StringTokenizer;
-
+import java.util.*;
+import java.io.*;
 public class Main {
-
-	static int N, M;
-	static int[] degree;
-	static List<Integer>[] adj;
-	
 	public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
-        StringTokenizer st;
-        
-        st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-
-        adj = new List[N + 1];
-        degree = new int[N + 1];
-        for (int i = 0; i <= N; i++) {
-        	adj[i] = new ArrayList<>();
-        }
-
-        for (int i = 0; i < M; i++) {
-            st = new StringTokenizer(br.readLine());
-            int A = Integer.parseInt(st.nextToken());
-            int B = Integer.parseInt(st.nextToken());
-            
-            adj[A].add(B);
-            degree[B]++;
-        }
-
-        Queue<Integer> queue = new LinkedList<>();
-        for (int i = 1; i <= N; i++) {
-            if (degree[i] == 0) {
-                queue.add(i);
-            }
-        }
-
-        while (!queue.isEmpty()) {
-            int curr = queue.poll();
-            sb.append(curr).append(" ");
-
-            for (int next : adj[curr]) {
-            	degree[next]--;
-                if (degree[next] == 0) {
-                    queue.add(next);
-                }
-            }
-        }
-
-        System.out.println(sb);
-    }
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st;
+		
+		st = new StringTokenizer(br.readLine());
+		int N = Integer.parseInt(st.nextToken());
+		int M = Integer.parseInt(st.nextToken());
+		
+		List<Integer>[] adj = new ArrayList[N + 1];
+		for (int i = 1; i <= N; i++) {
+			adj[i] = new ArrayList<>();
+		}
+		
+		int[] income = new int[N + 1];
+		for (int i = 0; i < M; i++) {
+			st = new StringTokenizer(br.readLine());
+			int A = Integer.parseInt(st.nextToken());
+			int B = Integer.parseInt(st.nextToken());
+			
+			adj[A].add(B);
+			income[B]++;
+		}
+		
+		StringBuilder answer = new StringBuilder();
+		Deque<Integer> queue = new ArrayDeque<>();
+		for (int i = 1; i <= N; i++) {
+			if (income[i] == 0) {
+				queue.add(i);
+				answer.append(i).append(" ");
+			}
+		}
+		
+		while(!queue.isEmpty()) {
+			int num = queue.poll();
+			
+			for (int i = 1; i <= N; i++) {
+				if (adj[num].size() == 0) continue;
+				
+				for (int stu : adj[num]) {
+					income[stu]--;					
+					if (income[stu] == 0) {
+						queue.add(stu);
+						answer.append(stu).append(" ");
+					}
+				}
+				
+				adj[num] = new ArrayList<>();
+			}
+		}
+		
+		System.out.println(answer.toString().trim());
+	}
 }
