@@ -1,137 +1,136 @@
-import java.io.*;
 import java.util.*;
-
+import java.io.*;
 public class Main {
-	static class Enemy implements Comparable<Enemy> {
-		int x, y, d; // 행, 열, 거리
-
-		public Enemy(int x, int y, int d) {
-			this.x = x;
-			this.y = y;
-			this.d = d;
-		}
-
-		@Override
-		public int compareTo(Enemy o) {
-			if (this.d == o.d) { // 거리가 같다면
-				return this.y - o.y; // 열이 더 작은 값(더 왼쪽)
-			} else
-				return this.d - o.d; // 거리가 더 작은 값
-		}
-	}
-
-	static int N, M, D;
-	static int map[][];
-	static List<int[]> list;
-	static int archer[];
-	static int maxCount; // 공격할 수 있는 최대 적 수(정답)
-
-	public static void main(String[] args) throws Exception {
+	
+	static int[] 행이동 = {0, -1, 0};	// 좌, 상, 우
+	static int[] 열이동 = {-1, 0, 1};	// 좌, 상, 우
+	
+	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st;
 		
 		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken()); // 격자판의 행
-		M = Integer.parseInt(st.nextToken()); // 격자판의 열
-		D = Integer.parseInt(st.nextToken()); // 궁수의 공격 거리
-
-		map = new int[N][M];
-		archer = new int[3]; // 궁수 3명의 공격 위치(열) 저장
-		list = new ArrayList<>(); // 몬스터 좌표 저장
-
-		for (int i = 0; i < N; i++) {
-			
+		int 행크기 = Integer.parseInt(st.nextToken());
+		int 열크기 = Integer.parseInt(st.nextToken());
+		int 사거리 = Integer.parseInt(st.nextToken());
+		
+		int[][] castle = new int[행크기][열크기];
+		for (int 행 = 0; 행 < 행크기; 행++) {
 			st = new StringTokenizer(br.readLine());
-			for (int j = 0; j < M; j++) {
-				
-				map[i][j] = Integer.parseInt(st.nextToken());
-				if (map[i][j] == 1) // 몬스터 좌표
-					list.add(new int[] { i, j});
+			for (int 열 = 0; 열 < 열크기; 열++) {
+				castle[행][열] = Integer.parseInt(st.nextToken());
+			}
+		}
+		
+		int 정답 = 0;
+		for (int 첫째 = 0; 첫째 < 열크기 - 2; 첫째++) {
+			for (int 둘째 = 첫째 + 1; 둘째 < 열크기 - 1; 둘째++) {
+				if (첫째 == 둘째) continue;
+				for (int 셋째 = 둘째 + 1; 셋째 < 열크기; 셋째++) {
+					if (둘째 == 셋째) continue;
+					
+					정답 = Math.max(정답, 적제거(castle, new int[] {첫째, 둘째, 셋째}, 사거리));
+				}
+			}
+		}
+		
+		System.out.println(정답);
+	}
+	
+	private static int 적제거(int[][] 기존격자, int[] 궁수, int 사거리) {
+		int 행크기 = 기존격자.length;
+		int 열크기 = 기존격자[0].length;
+
+		// 1번만 복사
+		int[][] 복사격자 = new int[행크기][열크기];
+		for (int 행 = 0; 행 < 행크기; 행++) {
+			for (int 열 = 0; 열 < 열크기; 열++) {
+				복사격자[행][열] = 기존격자[행][열];
 			}
 		}
 
-		locateArcher(0, 0); // 궁수 3명 자리 완전탐색
-		System.out.println(maxCount);
-	}
-
-	private static void locateArcher(int idx, int start) {
-		if (idx == 3) { // 3명 다 배치했으면 공격
-			List<int[]> data = copy(list);
-			attackMonster(data);
-			return;
-		}
-		
-		for (int i = start; i < M; i++) {
-			archer[idx] = i;
-			locateArcher(idx + 1, i + 1);
-		}
-
-	}
-
-	private static List<int[]> copy(List<int[]> list) { // 몬스터 좌표 리스트 복사
-		List<int[]> tmp = new ArrayList<>();
-		for (int i = 0; i < list.size(); i++) {
-			int[] cur = list.get(i);
-			tmp.add(new int[] { cur[0], cur[1] });
-		}
-		
-		return tmp;
-	}
-
-	private static void attackMonster(List<int[]> list) {
-		int count = 0; // 공격한 몬스터 수
-
+		int 제거한_적 = 0;
 		while (true) {
-			if (list.isEmpty()) // 더이상 적 없으면
-				break;
-			List<int[]> targets = new ArrayList<>(); // 궁수 3명이 공격하고자 하는 적의 좌표
-
-			for (int k = 0; k < 3; k++) { // 각 궁수마다 잡을 몬스터 설정
-				PriorityQueue<Enemy> pq = new PriorityQueue<>(); // 현재 궁수의 사정거리에 있는 몬스터들 저장(거리 순, 열 순 정렬)
-
-				for (int i = 0; i < list.size(); i++) { // 현재 남아있는 몬스터들
-					
-					int[] cur = list.get(i);
-					int d = Math.abs(cur[0] - N) + Math.abs(cur[1] - archer[k]); // 궁수와 몬스터 사이의 거리 계산
-					if (d <= D) // 사정거리 안이면
-						pq.add(new Enemy(cur[0], cur[1], d));
-				}
-
-				if (!pq.isEmpty()) { // 잡을 몬스터가 있다면
-					
-					Enemy target = pq.poll(); // 가장 가깝고, 왼쪽에 있는 적
-					boolean flag = false; // 현재 타겟을 다른 궁수가 잡으려 하는지 여부 / true면 이미 다른 궁수가 잡으려 함
-					for (int i = 0; i < targets.size(); i++) {
-						
-						int[] cur2 = targets.get(i);
-						if (target.x == cur2[0] && target.y == cur2[1]) // 이미 다른 누군가가 잡으려 함
-							flag = true;
-					}
-					if (!flag) {
-						targets.add(new int[] { target.x, target.y });
-					}
+			// 1. 제거할 수 있는 적 탐색
+			Set<String> 적위치 = new HashSet<>();
+			for (int i = 0; i < 3; i++) {
+				int[] 적 = 적탐색(복사격자, 궁수[i], 행크기, 열크기, 사거리);
+				
+				if (적 != null) {
+					적위치.add(적[0] + "," + 적[1]);
 				}
 			}
-			
-			// targets 리스트에 있는 애들 전부 제거
-			for (int i = 0; i < targets.size(); i++) {
-				for (int j = list.size() - 1; j >= 0; j--) {
-					if (targets.get(i)[0] == list.get(j)[0] && targets.get(i)[1] == list.get(j)[1]) {
-						list.remove(j);
-						count++;
+
+			// 2. 적 제거
+			for (String 위치 : 적위치) {
+				String[] 좌표 = 위치.split(",");
+				int 행 = Integer.parseInt(좌표[0]);
+				int 열 = Integer.parseInt(좌표[1]);
+				if (복사격자[행][열] == 1) {
+					복사격자[행][열] = 0;
+					제거한_적++;
+				}
+			}
+
+			// 3. 적 아래로 이동
+			for (int 행 = 행크기 - 2; 행 >= 0; 행--) {
+				for (int 열 = 0; 열 < 열크기; 열++) {
+					복사격자[행 + 1][열] = 복사격자[행][열];
+				}
+			}
+			// 첫 번째 행은 빈칸으로 초기화
+			Arrays.fill(복사격자[0], 0);
+
+			// 4. 적이 모두 제거되었으면 종료
+			boolean 적남아있음 = false;
+			for (int r = 0; r < 행크기; r++) {
+				for (int c = 0; c < 열크기; c++) {
+					if (복사격자[r][c] == 1) {
+						적남아있음 = true;
 						break;
 					}
 				}
+				if (적남아있음) break;
 			}
-			// 남아있는 몬스터들 이동(좌표 벗어나면 삭제)
-			for (int i = list.size() - 1; i >= 0; i--) {
-				
-				list.get(i)[0] += 1;
-				if (list.get(i)[0] == N)
-					list.remove(i);
+			if (!적남아있음) break;
+		}
+
+		return 제거한_적;
+	}
+
+	
+	private static int[] 적탐색(int[][] 격자, int 궁수, int 행크기, int 열크기, int 사거리) {
+		int[][] 복사격자 = new int[행크기 + 1][열크기];
+		for (int 행 = 0; 행 < 행크기; 행++) {
+			for (int 열 = 0; 열 < 열크기; 열++) {
+				복사격자[행][열] = 격자[행][열];
 			}
 		}
-		maxCount = Math.max(maxCount, count);
-
+		
+		Deque<int[]> 사격범위 = new ArrayDeque<int[]>();
+		boolean[][] 방문 = new boolean[행크기 + 1][열크기];
+		사격범위.add(new int[] {행크기, 궁수});
+		방문[행크기][궁수] = true;
+		
+		for (int 범위 = 0; 범위 < 사거리; 범위++) {
+			int 크기 = 사격범위.size();
+			for (int i = 0; i < 크기; i++) {
+				int[] 현위치 = 사격범위.poll();
+				
+				for (int d = 0; d < 3; d++) {
+					int 다음행 = 현위치[0] + 행이동[d];
+					int 다음열 = 현위치[1] + 열이동[d];
+					
+					if (다음행 < 0 || 다음열 < 0 || 다음열 >= 열크기 || 방문[다음행][다음열]) continue;
+					
+					if (복사격자[다음행][다음열] == 1) {
+						return new int[] {다음행, 다음열};
+					}
+					사격범위.add(new int[] {다음행, 다음열});
+				}
+			}
+		}
+		
+		return null;
 	}
 }
