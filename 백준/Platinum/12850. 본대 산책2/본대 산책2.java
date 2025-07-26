@@ -28,8 +28,7 @@ public class Main {
 	
 		matrixMap = new HashMap<>();
 		int D = sc.nextInt();
-		exponent(D);
-		System.out.println(matrixMap.get(D)[0][0]);
+		System.out.println(exponent(D)[0][0]);
 	}
 	
 	private static Long[][] exponent(int exp) {
@@ -37,24 +36,15 @@ public class Main {
 			return matrix;
 		}
 
-		if (matrixMap.containsKey(exp)) {
-			return matrixMap.get(exp);
-		}
+		Long[][] half = exponent(exp / 2);
+		Long[][] result = calculate(half, half);
 		
 		if (exp % 2 == 0) {
-			matrixMap.putIfAbsent((exp / 2), exponent(exp / 2));
-			matrixMap.put(exp, calculate(matrixMap.get(exp / 2), matrixMap.get(exp / 2)));
-			return matrixMap.get(exp);
+			return result;
 		}
-		
-		if (exp % 2 == 1) {
-			matrixMap.putIfAbsent((exp / 2), exponent(exp / 2));
-			matrixMap.putIfAbsent(exp - 1, calculate(matrixMap.get(exp / 2), matrixMap.get(exp / 2)));
-			matrixMap.put(exp, calculate(matrixMap.get(exp - 1), matrix));
-			return matrixMap.get(exp);
+		else {
+			return calculate(result, matrix);
 		}
-		
-		return null;
 	}
 	
 	private static Long[][] calculate(Long[][] m1, Long[][] m2) {
