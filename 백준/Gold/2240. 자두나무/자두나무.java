@@ -1,81 +1,61 @@
-import java.io.*;
 import java.util.*;
-
+import java.io.*;
 public class Main {
-
-    static int T, W;
-    static int[] plums;
-    static int[][][] dp;
-
-    public static void main(String[] args) throws IOException {
-        InputHandler();
-
-        Solution();
-
-        printResult();
-    }
-
-    private static void printResult() {
-        int result = 0;
-        for (int moves = 0; moves <= W; moves++) {
-            result = Math.max(result, Math.max(dp[T][moves][0], dp[T][moves][1]));
-        }
-
-        System.out.println(result);
-    }
-
-    private static void Solution() {
-        for (int time = 2; time <= T; time++) {
-            calculateDP(time);
-        }
-    }
-
-    private static void calculateDP(int time) {
-        // 시작 이후 한 번도 움직이지 않은 경우
-        dp[time][0][0] = dp[time - 1][0][0] + (plums[time] == 1 ? 1 : 0);
-
-        // 이동이 가능한 경우들
-        for (int moves = 1; moves <= W; moves++) {
-            // 1번 나무에서의 최대값 계산
-            calculatePosition(time, moves, 0);
-
-            // 2번 나무에서의 최대값 계산
-            calculatePosition(time, moves, 1);
-        }
-    }
-
-    private static void calculatePosition(int time, int moves, int pos) {
-        // 현재 위치에 머무르는 경우
-        int stay = dp[time - 1][moves][pos] + (plums[time] == pos + 1 ? 1 : 0);
-
-        // 다른 위치에서 현재 위치로 이동해온 경우
-        int move = dp[time - 1][moves - 1][1 - pos] + (plums[time] == pos + 1 ? 1 : 0);
-
-        // 두 경우 중 최대값 선택
-        dp[time][moves][pos] = Math.max(stay, move);
-    }
-
-    static void InputHandler() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-
-        T = Integer.parseInt(st.nextToken());
-        W = Integer.parseInt(st.nextToken());
-
-        plums = new int[T + 1];
-        for (int i = 1; i <= T; i++) {
-            plums[i] = Integer.parseInt(br.readLine());
-        }
-
-        dp = new int[T + 1][W + 1][2];
-
-        // 초기값 설정
-        if (plums[1] == 1) {
-            dp[1][0][0] = 1;  // 1번 나무에 있을 때
-            dp[1][1][1] = 0;  // 2번 나무로 이동했을 때
-        } else {
-            dp[1][0][0] = 0;  // 1번 나무에 있을 때
-            dp[1][1][1] = 1;  // 2번 나무로 이동했을 때
-        }
-    }
+	
+	/**
+	 * 받을 수 있는 자두의 최대 개수는?
+	 * 자두는 매 초마다 떨어진다.
+	 * 최대 W회 움직일 수 있다.
+	 * 
+	 * 완전 탐색 - 최대 1000combination30이니까 시간초과
+	 * dp라면
+	 * 현재 위치, 시각, 움직인 횟수를 고려해야 하므로 3차원 dp?
+	 * 
+	 */
+	
+	static int T, W;
+	static int[] times;
+	static int[][][] dp;
+	static int answer;
+	
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		
+		T = Integer.parseInt(st.nextToken());
+		W = Integer.parseInt(st.nextToken());
+		
+		times = new int[T + 1];
+		for (int i = 1; i <= T; i++) {
+			times[i] = Integer.parseInt(br.readLine());
+		}
+		
+		// dp[0][t][w] = Math.max(dp[0][t - 1][w], dp[1][t - 1][w - 1]) + 다음 위치
+		// dp[1][t][w] = Math.max(dp[0][t - 1][w - 1], dp[1][t - 1][w]) + 다음 위치
+		dp = new int[2][T + 1][W + 1];
+		dp[0][1][0] = times[1] == 1 ? 1 : 0;
+		dp[1][1][1] = 1 - dp[0][1][0];
+		
+		for (int time = 2; time <= T; time++) {
+			// 다음 나무가 1이면 1, 2이면 0
+			int tree = times[time] == 1 ? 1 : 0;
+			
+			// 한 번도 안움직이고 1번 나무 밑에 있는 경우
+			dp[0][time][0] = dp[0][time - 1][0] + tree;
+			
+			// 한 번도 안움직이고 2번 나무 밑에 있을 수는 없다.
+			
+			for (int move = 1; move <= W; move++) {
+				dp[0][time][move] = Math.max(dp[0][time - 1][move], dp[1][time - 1][move - 1]) + tree;
+				dp[1][time][move] = Math.max(dp[0][time - 1][move - 1], dp[1][time - 1][move]) + (1 - tree);
+			}
+		}
+		
+		for (int move = 0; move <= W; move++) {
+			answer = Math.max(answer, dp[0][T][move]);
+			answer = Math.max(answer, dp[1][T][move]);
+		}
+		
+		System.out.println(answer);
+	}
 }
