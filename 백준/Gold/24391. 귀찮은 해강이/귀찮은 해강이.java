@@ -58,12 +58,11 @@ public class Main {
 	}
 	
 	private static void union(int X, int Y) {
-	    X = findParent(X);
-	    Y = findParent(Y);
-	    
-	    if (X == Y) return;
-
-	    if (X < Y) parents[Y] = X;
-	    else parents[X] = Y;
+	    if (X < Y) {
+	    	parents[Y] = X;
+	    }
+	    else {
+	    	parents[X] = Y;
+	    }
 	}
 }
