@@ -1,77 +1,62 @@
 import java.util.*;
 import java.io.*;
+
 public class Main {
 
     static int N;
-    static int[] numArr;
-    static Map<Integer, List<int[]>> numMap;
+    static int[] A;
     static int answer;
 
     public static void main(String[] args) throws IOException {
-        InputHandler();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        Solution();
+        N = Integer.parseInt(br.readLine());
+        A = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        Arrays.sort(A);
 
-        printResult();
-    }
+        for (int targetIdx = 0; targetIdx < N; targetIdx++) {
+        	// 라벨링
+        	out:
+            for (int now = 0; now < N; now++) {
+                if (targetIdx == now) continue;
 
-    private static void printResult() {
+                int num = A[targetIdx] - A[now];			  // 필요한 나머지 수
+                int idx = lowerBoundBinarySearch(A, num);     // num의 가장 작은 인덱스 탐색
+
+                if (idx >= 0 && idx < N && A[idx] == num) {
+                    while (idx < N && A[idx] == num) {
+                        if (idx != targetIdx && idx != now) {
+                            answer++;
+                            break out;
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+
         System.out.println(answer);
     }
 
-    private static void Solution() {
-        // 얼리리턴 조건
-        if (N < 3) return;
-
-        for (int i = 0; i < N; i++) {
-            if (isGoodNum(i)) answer++;
-        }
-    }
-
-    private static boolean isGoodNum(int index) {
-        int target = numArr[index];
+    /**
+     * 같은 숫자 중에서도 가장 작은 인덱스를 찾는 lower bound 방식의 binary search
+     * - target 이상인 첫 번째 인덱스를 반환
+     * - 정확히 target이 존재하지 않으면, target보다 큰 첫 위치를 반환
+     */
+    private static int lowerBoundBinarySearch(int[] A, int target) {
         int left = 0;
-        int right = N - 1;
+        int right = A.length - 1;
 
         while (left < right) {
-            if (left == index) {    // 타겟 숫자와 같은 숫자인 경우
-                left++;
-                continue;
-            }
-            if (right == index) {   // 타겟 숫자와 같은 숫자인 경우
-                right--;
-                continue;
-            }
+            int mid = (left + right) >> 1;
 
-            int sum = numArr[left] + numArr[right];
-            if (sum == target) {
-                return true;
-            } else if (sum < target) {
-                left++;
+            if (A[mid] >= target) {
+                right = mid;
             } else {
-                right--;
+                left = mid + 1;
             }
         }
-        return false;
-    }
 
-    private static void InputHandler() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-
-        N = Integer.parseInt(br.readLine());
-
-        // 얼리리턴 조건
-        if (N < 3) {
-            answer = 0;
-            return;
-        }
-
-        st = new StringTokenizer(br.readLine());
-        numArr = new int[N];
-        for (int i = 0; i < N; i++) {
-            numArr[i] = Integer.parseInt(st.nextToken());
-        }
-        Arrays.sort(numArr);
+        return left == A.length ? -1 : left;
     }
 }
