@@ -1,99 +1,145 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.io.*;
 
 public class Main {
-
-	static int R;
-	static int C;
-	static int[][] map;
-	static int[][] copyMap;
-	static int[] dr = {-1, 1, 0, 0};	// 상, 하, 좌, 우
-	static int[] dc = {0, 0, -1, 1};	// 상, 하, 좌, 우
-	static int max = Integer.MIN_VALUE;
+	
+	/**
+	 * 연구소의 안전 영역의 크기의 최댓값
+	 * = 안전 영역의 크기 or 지도 크기 - 바이러스
+	 * 0 : 빈 칸, 1 : 벽, 2 : 바이러스
+	 */
+	
+	static int N, M;
+	static int[][] grid;
+	static boolean[][] visited;
+	static List<int[]> viruses;
+	static int[] dr = {-1, 1, 0, 0};
+	static int[] dc = {0, 0, -1, 1};
+	static int answer;
 	
 	public static void main(String[] args) throws IOException {
+		inputHandler();
+		
+		solution();
+		
+		printResult();
+	}
+	
+	private static void inputHandler() throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st;
 		
 		st = new StringTokenizer(br.readLine());
-		R = Integer.parseInt(st.nextToken());
-		C = Integer.parseInt(st.nextToken());
-		map = new int[R][C];
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
 		
-		for (int r = 0; r < R; r++) {
-			
+		grid = new int[N][M];
+		visited = new boolean[N][M];
+		viruses = new ArrayList<>();
+		for (int r = 0; r < N; r++) {
 			st = new StringTokenizer(br.readLine());
-			for (int c = 0; c < C; c++) map[r][c] = Integer.parseInt(st.nextToken());
-		}	// map완성
-		
-		DFS(0);	// 벽을 세우고
-		BFS();	// BFS로 빈 칸의 개수 중 제일 큰 값을 찾음
-		System.out.println(max);
-	}	// main
+			for (int c = 0; c < M; c++) {
+				grid[r][c] = Integer.parseInt(st.nextToken());
+				
+				if (grid[r][c] == 1) {
+					visited[r][c] = true;
+				}
+				
+				if (grid[r][c] == 2) {
+					viruses.add(new int[] {r, c});
+					visited[r][c] = true;
+				}
+			}
+		}
+	}
 	
-	// 벽을 세우는 메소드
-	static void DFS(int wallCnt) {
-		
-		if (wallCnt == 3) {
-			BFS();	// 벽 3개를 다 세웠으면 BFS 시작
+	/**
+	 * 1. 벽 3개 세우는 방법 조합
+	 * 2. 벽 3개를 모두 세우면 바이러스가 퍼질 수 있는 공간을 계산
+	 */
+	private static void solution() {
+		combineWall(0, 0);
+	}
+	
+	/**
+	 * 
+	 * @param index : 설치할 벽의 위치
+	 * @param count : 설치한 벽의 개수 
+	 */
+	private static void combineWall(int index, int count) {
+		if (count == 3) {
+			countVirus();
 			return;
 		}
+
+		if (index >= N * M) return;
 		
-		for (int r = 0; r < R; r++) {
-			for (int c = 0; c < C; c++) {
-				
-				if (map[r][c] == 0) {	// 빈 칸이면
-					map[r][c] = 1;	// 벽을 세움
-					DFS(wallCnt + 1);
-					map[r][c] = 0;
+		int r = index / M; 
+		int c = index % M;
+		
+		if (grid[r][c] == 0) {
+			visited[r][c] = true;
+			combineWall(index + 1, count + 1);
+			visited[r][c] = false;
+		}
+		
+		combineWall(index + 1, count);
+	}
+	
+	private static void countVirus() {
+		boolean[][] tempVisited = new boolean[N][M];
+		for (int r = 0; r < N; r++) {
+			for (int c = 0; c < M; c++) {
+				tempVisited[r][c] = visited[r][c];
+			}
+		}
+		
+		for (int i = 0; i < viruses.size(); i++) {
+			int r = viruses.get(i)[0];
+			int c = viruses.get(i)[1];
+			spreadVirus(r, c, tempVisited);
+		}
+		
+		int safeZone = 0;
+		for (int r = 0; r < N; r++) {
+			for (int c = 0; c < M; c++) {
+				if (grid[r][c] == 0 && !tempVisited[r][c]) {
+					safeZone++;
 				}
 			}
 		}
-	}	// DFS
-
-	// 바이러스를 퍼뜨리는 메소드
-	private static void BFS() {
 		
-		Queue<int[]> queue = new LinkedList<int[]>();	// 바이러스의 좌표를 담음
+		answer = Math.max(answer, safeZone);
+	}
+	
+	private static int spreadVirus(int r, int c, boolean[][] tempVisited) {
+		Deque<int[]> queue = new ArrayDeque<>();
+		queue.add(new int[] {r, c});
 		
-		copyMap = new int[R][C];	// 벽의 위치가 바뀌어 BFS를 호출할 떄마다 copyMap을 새로 설정
-		for (int r = 0; r < R; r++) {
-			for (int c = 0; c < C; c++) {	// copyMap에 map을 복사
-				copyMap[r][c] = map[r][c];
-				if (copyMap[r][c] == 2) queue.add(new int[] {r, c});	// 바이러스가 있다면 queue에 추가
-			}			
-		}
-		
-		while(!queue.isEmpty()) {
-			
-			int[] now = queue.poll();	// queue에서 바이러스의 좌표를 꺼내 now에 저장
-			int rNow = now[0];
-			int cNow = now[1];
+		int sumViruses = 0;
+		while (!queue.isEmpty()) {
+			int[] curr = queue.poll();
 			
 			for (int i = 0; i < 4; i++) {
+				int nr = curr[0] + dr[i];
+				int nc = curr[1] + dc[i];
 				
-				int rNext = rNow + dr[i];
-				int cNext = cNow + dc[i];
-				if (rNext >= 0 && rNext < R && cNext >= 0 && cNext < C && copyMap[rNext][cNext] == 0) {	// (범위를 벗어나지 않고) && (빈 칸이라면)
-					copyMap[rNext][cNext] = 2;	// 바이러스를 넣고
-					queue.add(new int[] {rNext, cNext});	// 바이러스를 넣은 칸을 queue에 추가
-				}
+				if (!isValid(nr, nc, tempVisited)) continue;
+				
+				tempVisited[nr][nc] = true;
+				queue.add(new int[] {nr, nc});
+				sumViruses++;
 			}
 		}
 		
-		int count = 0;	// 빈 칸의 개수를 저장할 변수
-		for (int r = 0; r < R; r++) {
-			for (int c = 0; c < C; c++) {
-				if (copyMap[r][c] == 0) {	// 감염되지 않았다면
-					count++;
-				}
-			}
-		}
-		
-		max = Math.max(max, count);
-	}	// BFS, 근데 이것도 바이러스가 계속 퍼져나가는 거니까 DFS로 하면 안되나??
+		return sumViruses;
+	}
+	
+	private static boolean isValid(int r, int c, boolean[][] tempVisited) {
+		return r >= 0 && r < N && c >= 0 && c < M && !tempVisited[r][c];
+	}
+	
+	private static void printResult() {
+		System.out.println(answer);
+	}
 }
