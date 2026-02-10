@@ -1,92 +1,90 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.StringTokenizer;
-
+import java.util.*;
+import java.io.*;
 public class Main {
 	
-	static int V, E, K;	// 정점, 간선의 개수, 정점의 번호
-	static List<Edge> [] edges;	// Edge들을 저장할 List
-	static int[] dist; // 시작 노드부터의 거리
-	static boolean[] visit;	// 방문처리 할 배열
-	static final int INF = 987654321;
+	/**
+	 * V : 정점의 개수
+	 * E : 간선의 개수
+	 * K : 시작 정점의 번호
+	 */
 	
-	static class Edge implements Comparable<Edge> {
-
-		int from, to, weight;
+	private static class Edge implements Comparable<Edge> {
+		int to, weight;
 		
-		public Edge(int from, int to, int weight) {
-			this.from = from;
+		public Edge(int to, int weight) {
 			this.to = to;
-			this.weight = weight;					
+			this.weight = weight;
 		}
 		
 		@Override
-		public int compareTo(Edge o) {
-			return Integer.compare(this.weight, o.weight); 
+		public int compareTo(Edge e) {
+			return Integer.compare(this.weight, e.weight);
 		}
 	}
 	
+	static int V, E, K;
+	static List<Edge>[] edges;
+	static int[] distance;
 	public static void main(String[] args) throws IOException {
+		inputHandler();
+		
+		dijkstra(K);
+		
+		printResult();
+	}
+	
+	private static void inputHandler() throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st;
 		
 		st = new StringTokenizer(br.readLine());
 		V = Integer.parseInt(st.nextToken());
 		E = Integer.parseInt(st.nextToken());
-		K = Integer.parseInt(br.readLine());
+		K = Integer.parseInt(br.readLine()) - 1;
 		
-		edges = new ArrayList[V + 1];
-		for (int i = 0; i < V + 1; i++)
+		edges = new List[V];
+		for (int i = 0; i < V; i++) {
 			edges[i] = new ArrayList<>();
+		}
 		
 		for (int i = 0; i < E; i++) {
-			
 			st = new StringTokenizer(br.readLine());
-			int A = Integer.parseInt(st.nextToken());
-			int B = Integer.parseInt(st.nextToken());
-			int W = Integer.parseInt(st.nextToken());
-			
-			// A에서 B로 가는 가중치 W를 갖는 간선의 정보를 추가
-			edges[A].add(new Edge(A, B, W));
+			edges[Integer.parseInt(st.nextToken()) - 1]
+					.add(new Edge(Integer.parseInt(st.nextToken()) - 1, Integer.parseInt(st.nextToken())));
 		}
-		
-		dijkstra(K);	// dijkstra 메소드
-		
-		for (int i = 1; i < V + 1; i++) {
-			
-			if (dist[i] == INF) System.out.println("INF");
-			else System.out.println(dist[i]);
-		}
-		
-	}	// main
-
+	}
+	
 	private static void dijkstra(int start) {
 		PriorityQueue<Edge> pq = new PriorityQueue<>();
+		pq.add(new Edge(start, 0));
 		
-		visit = new boolean[V + 1];
-		dist = new int[V + 1];
-		Arrays.fill(dist, INF);
-		dist[start] = 0;	// 시작 정점까지의 거리는 0
-		
-		pq.add(new Edge(start, start, 0));
+		distance = new int[V];
+		Arrays.fill(distance, 987654321);
+		distance[start] = 0;
 		
 		while (!pq.isEmpty()) {
 			Edge curr = pq.poll();
 			
-			if (visit[curr.to]) continue;	// 이미 방문했다면 비용을 알고 있다는 뜻
-			visit[curr.to] = true;	// 방문하지 않았다면 방문처리
-			
-			for (Edge edge : edges[curr.to]) {
-				if (!visit[edge.to] && dist[edge.to] > dist[edge.from] + edge.weight) {
-					dist[edge.to] = dist[edge.from] + edge.weight;
-					pq.add(new Edge(edge.from, edge.to, dist[edge.to]));
+			for (Edge next : edges[curr.to]) {
+				if (distance[next.to] > distance[curr.to] + next.weight) {
+					distance[next.to] = distance[curr.to] + next.weight;
+					pq.add(new Edge(next.to, distance[next.to]));
 				}
 			}
-		}	// while
-	}	// dijkstra
+		}
+	}
+	
+	private static void printResult() {
+		StringBuilder answer = new StringBuilder();
+		for (int i = 0; i < V; i++) {
+			if (distance[i] == 987654321) {
+				answer.append("INF").append("\n");
+				continue;
+			}
+			
+			answer.append(distance[i]).append("\n");
+		}
+		
+		System.out.println(answer.toString());
+	}
 }
