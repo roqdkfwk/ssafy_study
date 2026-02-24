@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.*;
 public class Main {
 
@@ -21,11 +22,10 @@ public class Main {
 			n = Integer.parseInt(st.nextToken());
 			m = Integer.parseInt(st.nextToken());
 			
-			if (n == 0 && m == 0) break;
+			if (n == 0 && m == 0) return;
 			
-			graph = new ArrayList[n + 1];
 			visited = new boolean[n + 1];
-			
+			graph = new ArrayList[n + 1];
 			for (int i = 1; i <= n; i++) {
 				graph[i] = new ArrayList<>();
 			}
@@ -39,25 +39,23 @@ public class Main {
 				graph[b].add(a);
 			}
 			
-			solution(caseNum);
-			caseNum++;
-			
+			solution(caseNum++);
 		}
 	}
 	
 	private static void solution(int caseNum) {
 		int treeCount = 0;
-		
 		for (int i = 1; i <= n; i++) {
-			if (!visited[i]) {
-				nodeCount = 0;
-				edgeCount = 0;
-				
-				dfs(i);
-				
-				if (edgeCount / 2 == nodeCount - 1) {
-					treeCount++;
-				}
+			if (visited[i]) continue;
+			
+			nodeCount = 0;
+			edgeCount = 0;
+			visited[i] = true;
+			nodeCount++;
+			dfs(i);
+			
+			if (edgeCount / 2 == nodeCount - 1) {
+				treeCount++;
 			}
 		}
 		
@@ -65,15 +63,14 @@ public class Main {
 	}
 	
 	private static void dfs(int now) {
-		visited[now] = true;
-		nodeCount++;
-		
 		for (int next : graph[now]) {
 			edgeCount++;
 			
-			if (!visited[next]) {
-				dfs(next);
-			}
+			if (visited[next]) continue;
+			
+			visited[next] = true;
+			nodeCount++;
+			dfs(next);
 		}
 	}
 	
